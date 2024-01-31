@@ -1,7 +1,7 @@
 # Investment_Power_Planning
 
 ## Goals 🖼️
-The aim of this repository is to provide the data and code to implement the case study carried out in this paper [1](https://ieeexplore.ieee.org/document/8369128)
+The aim of this repository is to provide the data and code to implement the case study carried out in this paper [[1]](https://ieeexplore.ieee.org/document/8369128)
 
 ## Contents 🌌
 TODO
