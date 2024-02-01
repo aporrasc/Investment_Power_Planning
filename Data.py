@@ -27,7 +27,7 @@ for country in load.columns:
     data["line_map"][country] = {}
 
     data["load"][country] = load[country].astype(float).to_list()
-    data["hydro"][country]["cap_factor"] = unit.at[country,"av_hydro"].astype(float)
+    data["hydro"][country]["annual_cap_factor"] = unit.at[country,"av_hydro"].astype(float)
     data["wind"][country]["cap_factor"]  = wind_av["wind-"+country].astype(float).to_list()
     data["solar"][country]["cap_factor"] = solar_av["solar-"+country].astype(float).to_list()
     data["hydro"][country]["potential"] = unit.at[country,"hydro"]*1000
