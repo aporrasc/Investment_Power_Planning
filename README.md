@@ -1,10 +1,12 @@
 # Investment_Power_Planning
 
 ## Goals 🖼️
-The aim of this repository is to provide the data and code to implement the case study carried out in this paper [[1]](https://ieeexplore.ieee.org/document/8369128)
+The aim of this repository is to provide the data and code to implement the case study carried out in this paper [[1]](https://ieeexplore.ieee.org/document/8369128).
 
 ## Contents 🌌
-TODO
+1. Excel files with the original data, that is, techno-economical parameters, availability profiles and demand time series.
+2. JSON file that serves as input data to the JuMP model.
+3. Julia file where the code related to the optimization problem is implemented.
 
 ## References 📚
 [1] S. Pineda and J. M. Morales, "Chronological Time-Period Clustering for Optimal Capacity Expansion Planning With Storage," in IEEE Transactions on Power Systems, vol. 33, no. 6, pp. 7162-7170, Nov. 2018.
