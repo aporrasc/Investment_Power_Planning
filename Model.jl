@@ -6,7 +6,7 @@ using Gurobi
 data = JSON.parsefile("input_data.json")
 
 # Input Data
-time_range = 4000:4100 # Horizon of Simulation
+time_range = 1:100 # Horizon of Simulation
 share = 0.5 # Share of Renewable Production
 
 # Optimization Model
@@ -60,16 +60,18 @@ model = Model(HiGHS.Optimizer)
 @constraint(model, soc[n=keys(data["load"]),tech=["intra","inter"],t=time_range[2:end]], s[n,tech,t] == s[n,tech,t-1] + data["techno"][tech]["eff"]*c[n,tech,t] - d[n,tech,t])
 
 # Cyclic Condition
-@constraint(model, cc[n=keys(data["load"]),tech=["intra","inter"]], s[n,tech,time_range[begin]] == s[n,tech,time_range[end]])
+# @constraint(model, cc[n=keys(data["load"]),tech=["intra","inter"]], s[n,tech,time_range[begin]] == s[n,tech,time_range[end]])
 
 # Renewable Target
 # As it should be done in real practice
-@constraint(model, rt, sum(p[n,tech,t] for n in keys(data["load"]) for tech in ["wind","solar","hydro"] for t in time_range) >= 0.5*sum(data["load"][n][t] for n in keys(data["load"]) for t in time_range))
+# @constraint(model, rt, sum(p[n,tech,t] for n in keys(data["load"]) for tech in ["wind","solar","hydro"] for t in time_range) >= 0.5*sum(data["load"][n][t] for n in keys(data["load"]) for t in time_range))
 # As in the paper
 # @constraint(model, rt, sum(p[n,tech,t] for n in keys(data["load"]) for tech in ["wind","solar"] for t in time_range) >= 0.5*sum(p[n,tech,t] for n in keys(data["load"]) for tech in ["base","peak"] for t in time_range))
 
 # Annual hydro factor
-@constraint(model, annual_hydro[n=keys(data["load"])], sum(p[n,"hydro",t] for t in time_range) <= data["hydro"][n]["annual_cap_factor"]*sum(P[n,"hydro"] for t in time_range))
+# @constraint(model, annual_hydro[n=keys(data["load"])], sum(p[n,"hydro",t] for t in time_range) <= data["hydro"][n]["annual_cap_factor"]*sum(P[n,"hydro"] for t in time_range))
+# Spine Implementation
+@constraint(model, annual_hydro[n=keys(data["load"]),t=time_range], p[n,"hydro",t] <= data["hydro"][n]["annual_cap_factor"]*P[n,"hydro"])
 
 # Solve the optimization problem
 optimize!(model)
