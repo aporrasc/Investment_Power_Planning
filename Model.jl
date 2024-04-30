@@ -19,6 +19,7 @@ model = Model(HiGHS.Optimizer)
 @variable(model,P[keys(data["load"]),["base","peak","wind","solar","hydro"]] >= 0) # Capacity
 # Storage
 @variable(model,s[keys(data["load"]),["intra","inter"],time_range] >= 0) # State
+@variable(model,s0[keys(data["load"]),["intra","inter"]] >= 0) # State
 @variable(model,c[keys(data["load"]),["intra","inter"],time_range] >= 0) # Charging
 @variable(model,d[keys(data["load"]),["intra","inter"],time_range] >= 0) # Discharging
 @variable(model,S[keys(data["load"]),["intra","inter"]] >= 0) # Capacity
@@ -58,20 +59,17 @@ model = Model(HiGHS.Optimizer)
 
 # State of Charge
 @constraint(model, soc[n=keys(data["load"]),tech=["intra","inter"],t=time_range[2:end]], s[n,tech,t] == s[n,tech,t-1] + data["techno"][tech]["eff"]*c[n,tech,t] - d[n,tech,t])
+@constraint(model, so[n=keys(data["load"]),tech=["intra","inter"]], s[n,tech,1] == s0[n,tech] + data["techno"][tech]["eff"]*c[n,tech,1] - d[n,tech,1])
 
 # Cyclic Condition
-# @constraint(model, cc[n=keys(data["load"]),tech=["intra","inter"]], s[n,tech,time_range[begin]] == s[n,tech,time_range[end]])
+@constraint(model, cc[n=keys(data["load"]),tech=["intra","inter"]], s0[n,tech] <= s[n,tech,time_range[end]])
+
 
 # Renewable Target
-# As it should be done in real practice
-# @constraint(model, rt, sum(p[n,tech,t] for n in keys(data["load"]) for tech in ["wind","solar","hydro"] for t in time_range) >= 0.5*sum(data["load"][n][t] for n in keys(data["load"]) for t in time_range))
-# As in the paper
-# @constraint(model, rt, sum(p[n,tech,t] for n in keys(data["load"]) for tech in ["wind","solar"] for t in time_range) >= 0.5*sum(p[n,tech,t] for n in keys(data["load"]) for tech in ["base","peak"] for t in time_range))
+@constraint(model, rt, sum(p[n,tech,t] for n in keys(data["load"]) for tech in ["wind","solar","hydro"] for t in time_range) >= 0)#0.5*sum(data["load"][n][t] for n in keys(data["load"]) for t in time_range))
 
 # Annual hydro factor
-# @constraint(model, annual_hydro[n=keys(data["load"])], sum(p[n,"hydro",t] for t in time_range) <= data["hydro"][n]["annual_cap_factor"]*sum(P[n,"hydro"] for t in time_range))
-# Spine Implementation
-@constraint(model, annual_hydro[n=keys(data["load"]),t=time_range], p[n,"hydro",t] <= data["hydro"][n]["annual_cap_factor"]*P[n,"hydro"])
+@constraint(model, annual_hydro[n=keys(data["load"])], sum(p[n,"hydro",t] for t in time_range) <= data["hydro"][n]["annual_cap_factor"]*sum(data["hydro"][n]["potential"] for t in time_range))
 
 # Solve the optimization problem
 optimize!(model)
